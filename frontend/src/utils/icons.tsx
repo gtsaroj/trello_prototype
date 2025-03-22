@@ -129,7 +129,7 @@ export const LeftArrow = ({ className }: { className?: string }) => {
 };
 export const RightArrow = ({ className }: { className?: string }) => {
   return (
-    <button className={` hover:bg-[#666a752a] duration-150 rounded-full p-1.5`}>
+    <button className={` ${className} hover:bg-[#666a752a] duration-150 rounded-full p-1.5`}>
       <ArrowRight className="size-6 sm:size-7  text-white " />{" "}
     </button>
   );

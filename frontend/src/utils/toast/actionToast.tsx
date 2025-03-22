@@ -1,5 +1,4 @@
 // src/utils/toaster.ts
-import React from "react";
 import { JSX } from "react";
 import toast from "react-hot-toast";
 import { Icons } from "../icons";
@@ -54,7 +53,7 @@ export const toaster = ({
           t.visible ? "animate-enter" : "animate-leave opacity-0"
         } max-w-md justify-between w-full ${
           className || "bg-white"
-        } shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+        } shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-gray-100 ring-opacity-5`}
       >
         <div className="flex px-2 sm:px-3 sm:py-4 py-2 items-center">
           <div className="p-2 rounded-full bg-white">
@@ -66,12 +65,12 @@ export const toaster = ({
           </div>
         </div>
         <div className="w-[50px] p-1 rounded-r-lg flex items-center justify-center border-l h-full  ">
-          <button
+          <div
             onClick={() => toast.dismiss(toastId)}
             className="w-full text-black"
           >
             Close
-          </button>
+          </div>
         </div>
       </div>
     ),

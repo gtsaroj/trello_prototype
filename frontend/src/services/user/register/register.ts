@@ -8,7 +8,7 @@ export const registerUser = async (
   try {
     const response = await makeRequest({
       method: "post",
-      url: "auth/register",
+      url: "users/create",
       data: { ...data },
     });
     return response.data;

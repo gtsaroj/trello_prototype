@@ -1,16 +1,22 @@
 import { ApiError } from "@/helpers";
 import { makeRequest } from "@/makeRequest";
+import { toaster } from "@/utils";
 import axios from "axios";
+import toast from "react-hot-toast";
 
-export const loginUser = async (
+export const loginUsers = async (
   email: string,
   password: string
 ): Promise<Api.Response<Auth.AuthResponse>> => {
+  const loading = toaster({
+    icon: "loading",
+    message: "Loading...",
+  });
   try {
     const response = await makeRequest({
       method: "post",
-      url: "auth/register",
-      data: { email, password },
+      url: "users/login",
+      data: { email, password, role: "authenticatedUser" },
     });
     return response.data;
   } catch (error) {
@@ -21,5 +27,7 @@ export const loginUser = async (
       throw new ApiError(statusCode, message, errorMessage, false);
     }
     throw new ApiError(500);
+  } finally {
+    toast.dismiss(loading);
   }
 };

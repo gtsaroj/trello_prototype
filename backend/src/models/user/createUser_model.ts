@@ -1,29 +1,19 @@
 import { connectDb } from "../../config/database";
 import { APIError } from "../../helpers/error/apiError";
 
-const createUser_model = async (data: User.User) => {
+const createUser_model = async () => {
   const query = `
+
 CREATE TABLE IF NOT EXISTS users (
     uid TEXT PRIMARY KEY,
     role TEXT CHECK (role IN ('authenticatedUser', 'guest')) NOT NULL,
     display_name TEXT,
     email TEXT UNIQUE,
-    photo_url TEXT,
-    refresh_token TEXT
+    photo_URL TEXT,
+  "refreshToken" TEXT,  -- Use double quotes here
+    password TEXT
 );
   `;
-  const values = [
-    data.uid,
-    data.displayName,
-    data.email,
-    data.photoURL,
-    data.role,
-    data.refreshToken,
-  ];
-  const command = `
-  INSERT INTO users (name, email, password) 
-  VALUES ($1, $2, $3) RETURNING *;
-`;
 
   try {
     const pool = await connectDb();
@@ -34,5 +24,8 @@ CREATE TABLE IF NOT EXISTS users (
     if (error instanceof APIError) {
       throw new APIError(error?.message, error.statusCode);
     }
+    throw new APIError("Error while creating table", 500, error);
   }
 };
+
+export { createUser_model };

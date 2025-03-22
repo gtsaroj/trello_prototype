@@ -18,13 +18,13 @@ export const routers: Routes = {
     element: <HomePage />,
     isAccessibleToPublicOnly: true,
   },
-  "/dashboard": {
-    accessToAnyOne: false,
+  "dashboard": {
     element: <Dashboard />,
     requiresAuth: true,
     roles: ["authenticatedUser"],
+    accessToAnyOne: false,
   },
-  "/workspace": {
+  "/workspace/:id": {
     accessToAnyOne: false,
     element: <WorkSpace />,
     roles: ["authenticatedUser"],

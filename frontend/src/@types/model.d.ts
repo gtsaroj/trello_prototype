@@ -1,12 +1,13 @@
 declare namespace Model {
-  interface TodoList<T> {
+  interface TodoList {
+    todo_id?:string
     id: string;
     title: string;
     description: string;
     comment?: string;
     label?: string[];
     date?: string;
-    attachment?: T[];
+    attachment?: string[];
     location?: string;
     createdAt?: Common.TimeStamp;
     updatedAt?: Common.TimeStamp;
@@ -14,6 +15,6 @@ declare namespace Model {
   interface Todo {
     id: string;
     title: string;
-    todoList: TodoList;
+    todoList: TodoList
   }
 }

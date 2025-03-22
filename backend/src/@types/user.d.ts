@@ -32,8 +32,9 @@ declare namespace User {
     uid: string;
     displayName: string | null;
     email: string | null;
-    photoURL: string | null;
+    photoURL?: string | null;
     refreshToken?: string;
+    password?: string;
   }
 
   interface AddUser<T> {
@@ -43,5 +44,17 @@ declare namespace User {
     data: Partial<T>;
     error?: string;
     isLoading: boolean;
+  }
+
+  interface DecodeToken {
+    uid: string;
+    role: UserType;
+    iat: number;
+    exp: number;
+  }
+
+  interface LogoutSchemaType {
+    uid: string;
+    role: UserType;
   }
 }

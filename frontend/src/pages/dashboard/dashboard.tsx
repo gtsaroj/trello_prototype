@@ -1,4 +1,8 @@
 import { Button, Card, Input } from "@/components";
+import { useAppSelector } from "@/hooks";
+import { authLogout } from "@/reducers";
+import { store } from "@/store";
+import Cookies from "js-cookie";
 import {
   Trello,
   Search,
@@ -15,9 +19,13 @@ import {
   Eye,
   CreditCard,
   Section as Collection,
+  LogOut,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function Dashboard() {
+  const navigate = useNavigate();
+  const { user } = useAppSelector();
   return (
     <div className="min-h-screen bg-[#1D2125] text-white">
       {/* Top Navigation */}
@@ -59,8 +67,17 @@ export function Dashboard() {
           <Button variant="ghost" size="icon" className="hover:bg-[#333B44]">
             <Bell className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="hover:bg-[#333B44]">
-            <HelpCircle className="h-5 w-5" />
+          <Button
+            onClick={() => {
+              store.dispatch(authLogout());
+              Cookies?.remove("accessToken");
+              Cookies?.remove("refreshToken");
+            }}
+            variant="ghost"
+            size="icon"
+            className="hover:bg-red-500 hover:text-white"
+          >
+            <LogOut className="h-5 w-5" />
           </Button>
         </div>
       </nav>
@@ -155,7 +172,10 @@ export function Dashboard() {
           <h1 className="text-2xl font-semibold mb-6">Templates</h1>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            <Card className="bg-[#22272B] border-[#333B44] overflow-hidden">
+            <Card
+              onClick={() => navigate(`/workspace/${user?.data?.uid} `)}
+              className="bg-[#22272B] hover:ring ring-gray-600 cursor-pointer border-[#333B44] overflow-hidden"
+            >
               <div className="h-32 bg-blue-600"></div>
               <div className="p-4">
                 <h3 className="font-medium mb-1">Basic Board</h3>
@@ -163,7 +183,7 @@ export function Dashboard() {
               </div>
             </Card>
 
-            <Card className="bg-[#22272B] border-[#333B44] overflow-hidden">
+            <Card className="bg-[#22272B] hover:ring ring-gray-600 cursor-pointer  border-[#333B44] overflow-hidden">
               <div className="h-32 bg-teal-600"></div>
               <div className="p-4">
                 <h3 className="font-medium mb-1">Kanban Template</h3>
@@ -171,7 +191,7 @@ export function Dashboard() {
               </div>
             </Card>
 
-            <Card className="bg-[#22272B] border-[#333B44] overflow-hidden">
+            <Card className="bg-[#22272B] hover:ring ring-gray-600 cursor-pointer border-[#333B44] overflow-hidden">
               <div className="h-32 bg-purple-600"></div>
               <div className="p-4">
                 <h3 className="font-medium mb-1">Daily Task Management</h3>
@@ -179,7 +199,7 @@ export function Dashboard() {
               </div>
             </Card>
 
-            <Card className="bg-[#22272B] border-[#333B44] overflow-hidden">
+            <Card className="bg-[#22272B] hover:ring ring-gray-600 cursor-pointer  border-[#333B44] overflow-hidden">
               <div className="h-32 bg-orange-600"></div>
               <div className="p-4">
                 <h3 className="font-medium mb-1">Remote Team Hub</h3>

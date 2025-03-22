@@ -1,17 +1,6 @@
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  Input,
-  Card,
-} from "@/components";
+"use client";
+
+import { useState } from "react";
 import {
   Trello,
   Search,
@@ -24,9 +13,64 @@ import {
   MoreHorizontal,
   Calendar,
   Table,
+  User,
+  CheckSquare,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { CreateCard } from "@/components";
+
+type CardType = {
+  id: string;
+  title: string;
+  column: string;
+  items?: number;
+  labels?: string[];
+  dueDate?: string;
+  assignee?: string;
+};
 
 export function WorkSpace() {
+  const [openBoard, setOpenBoard] = useState<boolean>(false);
+  const [selectedColumn, setSelectedColumn] = useState<string>("Info");
+
+  // Sample data for a new card
+  const newCardData = {
+    id: "new-card-" + Date.now(),
+    title: "New Card",
+    todoList: {
+      id: "todolist-" + Date.now(),
+      title: "Task",
+      description: "Add a description for this task",
+      label: [],
+      attachment: [],
+      comment: "",
+      location: "",
+      date: "",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+  };
+
+  const handleAddCard = (columnTitle: string) => {
+    setSelectedColumn(columnTitle);
+    setOpenBoard(true);
+  };
+
   return (
     <div className="min-h-screen bg-[#1D2125] text-white">
       {/* Top Navigation */}
@@ -177,77 +221,214 @@ export function WorkSpace() {
           </div>
         </div>
 
-        {/* Board Content */}
-        <div className="flex-1 p-4">
-          <div className="grid grid-cols-4 gap-4">
-            {/* Info Column */}
-            <div className="space-y-4">
-              <div className="bg-[#22272B] rounded-md">
-                <div className="p-3 flex items-center justify-between">
-                  <h3 className="font-medium">Info</h3>
-                  <div className="flex items-center space-x-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 hover:bg-[#333B44]"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 hover:bg-[#333B44]"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                <Card className="m-2 bg-[#282E33] border-[#333B44]">
-                  <div className="p-3">
-                    <h4 className="font-medium mb-2">How to use this board</h4>
-                    <div className="flex items-center text-sm text-[#9FADBC]">
-                      <LayoutGrid className="h-4 w-4 mr-2" />
-                      <span>1</span>
-                    </div>
-                  </div>
-                </Card>
+        {/* Main Board Area */}
+        <KanbanBoard onAddCard={handleAddCard} />
+      </div>
+
+      {openBoard && (
+        <CreateCard
+          close={() => setOpenBoard(false)}
+          data={{
+            ...newCardData,
+            title: `New ${selectedColumn} Card`,
+            todoList: {
+              ...newCardData.todoList,
+              title: selectedColumn,
+            },
+          }}
+          isOpen={openBoard}
+        />
+      )}
+    </div>
+  );
+}
+
+function KanbanBoard({ onAddCard }: { onAddCard?: (column: string) => void }) {
+  const [cards, setCards] = useState<CardType[]>([
+    { id: "1", title: "How to use this board", column: "Info", items: 1 },
+    {
+      id: "2",
+      title: "Quarterly performance review",
+      column: "Manager's Topics",
+      dueDate: "Apr 15",
+    },
+    {
+      id: "3",
+      title: "Project timeline updates",
+      column: "Manager's Topics",
+      items: 3,
+      labels: ["urgent"],
+    },
+    {
+      id: "4",
+      title: "Team building activities",
+      column: "Discussion",
+      assignee: "Alex",
+    },
+    {
+      id: "5",
+      title: "New client onboarding process",
+      column: "Discussion",
+      items: 2,
+      labels: ["process"],
+    },
+    {
+      id: "6",
+      title: "Improve documentation",
+      column: "Goals",
+      dueDate: "May 1",
+    },
+    {
+      id: "7",
+      title: "Learn new framework",
+      column: "Goals",
+      items: 4,
+      labels: ["personal"],
+    },
+  ]);
+
+  const handleAddCard = (column: string) => {
+    const newCard = {
+      id: Date.now().toString(),
+      title: `New card in ${column}`,
+      column,
+    };
+    setCards([...cards, newCard]);
+
+    // If external handler is provided, call it too
+    if (onAddCard) {
+      onAddCard(column);
+    }
+  };
+
+  const getColumnCards = (column: string) => {
+    return cards.filter((card) => card.column === column);
+  };
+
+  const renderCard = (card: CardType) => (
+    <Card
+      key={card.id}
+      className="m-2 bg-[#282E33] border-[#333B44] hover:bg-[#2C343A] transition-colors"
+    >
+      <div className="p-3">
+        {card.labels && card.labels.length > 0 && (
+          <div className="flex gap-1 mb-2">
+            {card.labels.map((label) => (
+              <span
+                key={label}
+                className={`px-2 py-0.5 text-xs rounded ${
+                  label === "urgent"
+                    ? "bg-red-900 text-red-100"
+                    : label === "process"
+                    ? "bg-blue-900 text-blue-100"
+                    : "bg-green-900 text-green-100"
+                }`}
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+        )}
+        <h4 className="font-medium mb-2">{card.title}</h4>
+        <div className="flex items-center justify-between text-sm text-[#9FADBC]">
+          <div className="flex items-center">
+            {card.items !== undefined && (
+              <div className="flex items-center mr-3">
+                <CheckSquare className="h-4 w-4 mr-1" />
+                <span>{card.items}</span>
+              </div>
+            )}
+            {card.dueDate && (
+              <div className="flex items-center mr-3">
+                <Calendar className="h-4 w-4 mr-1" />
+                <span>{card.dueDate}</span>
+              </div>
+            )}
+          </div>
+          {card.assignee && (
+            <div className="flex items-center">
+              <div className="h-6 w-6 rounded-full bg-[#333B44] flex items-center justify-center">
+                <User className="h-3 w-3" />
               </div>
             </div>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
 
-            {/* Other Columns */}
-            {["Manager's Topics", "Discussion", "Goals"].map((title, index) => (
-              <div key={index} className="space-y-4 cursor-pointer">
-                <div className="bg-[#22272B] rounded-md">
-                  <div className="p-3 flex items-center justify-between">
-                    <h3 className="font-medium">{title}</h3>
-                    <div className="flex items-center space-x-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 hover:bg-[#333B44]"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 hover:bg-[#333B44]"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
+  return (
+    <div className="flex-1 p-4 bg-[#1D2125] text-white">
+      <div className="grid grid-cols-4 gap-4">
+        {/* Info Column */}
+        <div className="space-y-4">
+          <div className="bg-[#22272B] rounded-md">
+            <div className="p-3 flex items-center justify-between">
+              <h3 className="font-medium">Info</h3>
+              <div className="flex items-center space-x-1">
+                <Button
+                  onClick={() => handleAddCard("Info")}
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 hover:bg-[#333B44]"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 hover:bg-[#333B44]"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            {getColumnCards("Info").map(renderCard)}
+            <Button
+              onClick={() => handleAddCard("Info")}
+              variant="ghost"
+              className="w-full justify-start p-3 hover:bg-[#333B44] text-[#9FADBC]"
+            >
+              <Plus className="h-4 w-4 mr-2" /> Add a card
+            </Button>
+          </div>
+        </div>
+
+        {/* Other Columns */}
+        {["Manager's Topics", "Discussion", "Goals"].map((title) => (
+          <div key={title} className="space-y-4">
+            <div className="bg-[#22272B] rounded-md">
+              <div className="p-3 flex items-center justify-between">
+                <h3 className="font-medium">{title}</h3>
+                <div className="flex items-center space-x-1">
+                  <Button
+                    onClick={() => handleAddCard(title)}
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 hover:bg-[#333B44]"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="ghost"
-                    className="w-full justify-start p-3 hover:bg-[#333B44] text-[#9FADBC]"
+                    size="icon"
+                    className="h-6 w-6 hover:bg-[#333B44]"
                   >
-                    <Plus className="h-4 w-4 mr-2" /> Add a card
+                    <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
-            ))}
+              {getColumnCards(title).map(renderCard)}
+              <Button
+                onClick={() => handleAddCard(title)}
+                variant="ghost"
+                className="w-full justify-start p-3 hover:bg-[#333B44] text-[#9FADBC]"
+              >
+                <Plus className="h-4 w-4 mr-2" /> Add a card
+              </Button>
+            </div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );

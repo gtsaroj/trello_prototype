@@ -4,6 +4,6 @@ import { todoRouter } from "../features/todo/todo.routes";
 
 const rootRouter = Router();
 
-rootRouter.use("users", userRouter);
-rootRouter.use("todos", todoRouter);
+rootRouter.use("/users", userRouter);
+rootRouter.use("/todos", todoRouter);
 export { rootRouter };

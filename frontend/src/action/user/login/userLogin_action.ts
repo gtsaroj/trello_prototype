@@ -1,20 +1,28 @@
 import { ApiError } from "@/helpers";
-import { loginUser } from "@/services";
-import Cookies from "js-cookie";
-
+import { loginUsers } from "@/services";
 import { toaster } from "@/utils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import Cookies from "js-cookie";
+import { toast } from "sonner";
 
+// Async action for user login
 export const userLogin_action = createAsyncThunk(
-  "login",
+  "auth/login",
   async (data: Auth.LoginType, thunkApi) => {
+
     try {
-      const response = await loginUser(data.email, data.password);
+      const response = await loginUsers(data.email, data.password);
+      toaster({
+        className: " bg-green-50",
+        icon: "success",
+        message: response.message,
+        title: "Successfully login!",
+      });
       Cookies.set("refreshToken", response?.data?.refreshToken, {
         expires: response?.data?.expiresAt,
         secure: true,
       });
-      Cookies.set("accessToken", response?.data?.accessTokent, {
+      Cookies.set("accessToken", response?.data?.accessToken, {
         expires: response?.data?.expiresAt,
         secure: true,
       });
@@ -27,7 +35,7 @@ export const userLogin_action = createAsyncThunk(
           message: error?.message,
           title: "Error",
         });
-        throw thunkApi?.rejectWithValue(error);
+        throw thunkApi.rejectWithValue(error.message);
       }
     }
   }

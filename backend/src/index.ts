@@ -1,15 +1,16 @@
-import express from "express";
-import cors from "cors";
-import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { rootRouter } from "./routes/routes.js";
 import { app } from "./app.js";
 import { connectDb } from "./config/database/index.js";
+import { createUser_model } from "./models/user/createUser_model.js";
+import { createTodoTable } from "./models/todo/todoModel.js";
 
 dotenv.config();
 
+connectDb();
 
-connectDb()
+createUser_model();
+createTodoTable();
 
 app.get("/test", (_, res) => {
   res.status(200).send("Running on server.");

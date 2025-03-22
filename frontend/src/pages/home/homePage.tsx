@@ -1,9 +1,17 @@
 import { Button, Card, Input } from "@/components";
+import { useAppSelector } from "@/hooks";
+import { authLogout } from "@/reducers";
+import { store } from "@/store";
+import { Icons, toaster } from "@/utils";
 import { Mail, PlayCircle, Slack, Trello } from "lucide-react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 
 export function HomePage() {
   const router = useNavigate();
+  const { user } = useAppSelector();
+  const [open, setOpen] = React.useState<boolean>(false);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -12,26 +20,97 @@ export function HomePage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Trello className="h-8 w-8 text-blue-600" />
-              <span className="ml-2 text-xl font-bold">Trello</span>
+              <span className="ml-2 text-xl font-bold">Trelyoh</span>
             </div>
             <div className="hidden md:flex items-center space-x-4">
-              <Button variant="ghost">Features</Button>
-              <Button variant="ghost">Solutions</Button>
-              <Button variant="ghost">Plans</Button>
-              <Button variant="ghost">Pricing</Button>
-              <Button variant="ghost">Resources</Button>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button onClick={() => router("login")} variant="ghost">
-                Log in
+              <Button
+                onClick={() =>
+                  toaster({
+                    icon: "error",
+                    message: "It seems like your device doesn't support!",
+                    title: "Oops! Time for an Upgrade",
+                  })
+                }
+                variant="ghost"
+              >
+                Features
               </Button>
               <Button
-                onClick={() => router("register")}
-                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() =>
+                  toaster({
+                    icon: "error",
+                    message: "It seems like your device doesn't support!",
+                    title: "Oops! Time for an Upgrade",
+                  })
+                }
+                variant="ghost"
               >
-                Get Trello for free
+                Solutions
+              </Button>
+              <Button
+                onClick={() =>
+                  toaster({
+                    icon: "error",
+                    message: "It seems like your device doesn't support!",
+                    title: "Oops! Time for an Upgrade",
+                  })
+                }
+                variant="ghost"
+              >
+                Plans
+              </Button>
+              <Button
+                onClick={() =>
+                  toaster({
+                    icon: "error",
+                    message: "It seems like your device doesn't support!",
+                    title: "Oops! Time for an Upgrade",
+                  })
+                }
+                variant="ghost"
+              >
+                Pricing
+              </Button>
+              <Button
+                onClick={() =>
+                  toaster({
+                    icon: "error",
+                    message: "It seems like your device doesn't support!",
+                    title: "Oops! Time for an Upgrade",
+                  })
+                }
+                variant="ghost"
+              >
+                Resources
               </Button>
             </div>
+            {user?.isSuccess ? (
+              <div className="flex items-center justify-start">
+                <button className="flex  cursor-pointer bg-transparent items-center justify-start gap-1.5">
+                  <h1 className=" text-[16px] text-black ">
+                    {user?.data?.display_name}
+                  </h1>
+                </button>
+                <span
+                  onClick={() => store.dispatch(authLogout())}
+                  className="text-red-500 cursor-pointer "
+                >
+                  Logout
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Button onClick={() => router("login")} variant="ghost">
+                  Log in
+                </Button>
+                <Button
+                  onClick={() => router("register")}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Get Trello for free
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </nav>

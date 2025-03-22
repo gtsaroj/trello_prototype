@@ -13,7 +13,7 @@ declare namespace Auth {
   interface AuthResponse {
     data: User;
     refreshToken: string;
-    accessTokent: string;
+    accessToken: string;
     expiresAt: number;
   }
 
@@ -28,14 +28,13 @@ declare namespace Auth {
   }
 
   interface User {
-    role: UserType
+    role: UserType;
     uid: string;
-    displayName: string | null;
+    display_name: string | null;
     email: string | null;
-    photoURL: string | null;
-    emailVerified?: boolean;
-    providerData: ProviderData[];
-    stsTokenManager: TokenManager;
+    photoURL?: string | null;
+    refreshToken?: string;
+    password?: string;
   }
 
   interface AddUser<T> {

@@ -1,48 +1,64 @@
-import { Pool } from "pg";
+import { connectDb } from "../../../config/database";
+import { APIError } from "../../../helpers/error/apiError";
 
-const createTodo = async (pool: Pool, todo: Todo.Todo) => {
+const addTodoInDatabase = async (todo: Todo.Todo): Promise<Todo.Todo[]> => {
   const todoQuery = `
-   INSERT INTO todos (id, title)
-   VALUES ($1, $2)
+   INSERT INTO todos (id, title, "createdAt")
+   VALUES ($1, $2, NOW())
    ON CONFLICT (id) DO NOTHING RETURNING *;
  `;
 
-  const todoListQuery = `
-   INSERT INTO todo_lists (id, todo_id, title, description, comment, label, date, attachment, location, created_at, updated_at)
-   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
-   ON CONFLICT (id) DO NOTHING RETURNING *;
- `;
-
-  const client = await pool.connect();
+  const client = await connectDb();
   try {
-    await client.query("BEGIN");
-
     const todoValues = [todo.id, todo.title];
-    await client.query(todoQuery, todoValues);
-
-    for (const list of todo.todoList) {
-      const todoListValues = [
-        list.id,
-        todo.id,
-        list.title,
-        list.description,
-        list.comment,
-        list.label,
-        list.date,
-        JSON.stringify(list.attachment),
-        list.location,
-      ];
-      await client.query(todoListQuery, todoListValues);
-    }
-
-    await client.query("COMMIT");
-    console.log("✅ Todo created successfully!");
+    const { rows } = await client.query(todoQuery, todoValues);
+    return rows;
   } catch (error) {
+    console.log(error)
     await client.query("ROLLBACK");
-    throw error;
-  } finally {
-    client.release();
+    throw new APIError("Error while add todo in database", 500,error);
   }
 };
 
-export { createTodo };
+export const addTodoListInDatabase = async (
+  tod_id: string,
+  {
+    id,
+    description,
+    title,
+    attachment,
+    comment,
+    date,
+    label,
+    location,
+  }: Todo.TodoList<string>
+): Promise<Todo.TodoList<string>[] | undefined> => {
+  const dbInstance = await connectDb();
+  const query = `INSERT INTO todo_lists (todo_id,id, title, description, comment, label, date, attachment, location, createdAt)
+   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,NOW()
+   )`;
+  const values = [
+    tod_id,
+    id,
+    title,
+    description,
+    comment,
+    label,
+    date,
+    attachment,
+    location,
+  ];
+
+  try {
+    const { rows } = await dbInstance.query(query, values);
+    return rows;
+  } catch (error) {
+    throw new APIError(
+      "Error while inserting todo_list in database",
+      500,
+      error
+    );
+  }
+};
+
+export { addTodoInDatabase };

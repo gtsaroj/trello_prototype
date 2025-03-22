@@ -12,6 +12,8 @@ export const PrivateRoute: React.FC<PrivateRouteProp> = ({ userRole }) => {
 
   const auth = useSelector((state: RootState) => state.root.user);
 
+  console.log("flksdjl")
+
   useEffect(() => {}, [auth.data, auth.isSuccess]);
 
   return auth.isSuccess ? (
@@ -21,6 +23,6 @@ export const PrivateRoute: React.FC<PrivateRouteProp> = ({ userRole }) => {
       <div>Unauthorized Access</div>
     )
   ) : (
-    <Navigate to={"/login"} state={location} replace></Navigate>
+    <Navigate to={"/"} state={location} replace></Navigate>
   );
 };

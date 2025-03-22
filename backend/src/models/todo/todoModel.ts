@@ -1,36 +1,38 @@
-import { Pool } from "pg";
 import { APIError } from "../../helpers/error/apiError";
+import { connectDb } from "../../config/database";
 
-const createTodosTable = async (pool: Pool) => {
+const createTodoTable = async () => {
+  const dbInstance = await connectDb();
   try {
     const query = `
+      CREATE TABLE IF NOT EXISTS todos (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    "createdAt" TIMESTAMP DEFAULT NOW(),
+    "updatedAt" TIMESTAMP DEFAULT NOW()
+  );
+
   CREATE TABLE IF NOT EXISTS todo_lists (
+    todo_id TEXT REFERENCES todos(id) ON DELETE CASCADE,
     id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     comment TEXT,
     label TEXT[],
     date TEXT,
-    attachment JSONB,
+    attachment Text,
     location TEXT,
-    createdAt TIMESTAMP DEFAULT NOW(),
-    updatedAt TIMESTAMP DEFAULT NOW()
+    "createdAt" TIMESTAMP DEFAULT NOW(),
+    "updatedAt" TIMESTAMP DEFAULT NOW()
   );
 
-  CREATE TABLE IF NOT EXISTS todos (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    todo_list_id TEXT REFERENCES todo_lists(id) ON DELETE CASCADE
-  );
+
   `;
-    await pool.query(query);
+    await dbInstance.query(query);
     console.log("✅ Todo tables created (if not exists)");
   } catch (error) {
-    if (error instanceof APIError) {
-      throw new APIError(error?.message, error?.statusCode);
-    }
-    throw new APIError("Error while creating table of Todos", 500);
+    console.log(error);
   }
 };
 
-export { createTodosTable };
+export { createTodoTable };

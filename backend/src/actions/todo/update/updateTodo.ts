@@ -1,60 +1,52 @@
-import { Pool } from "pg";
+import { connectDb } from "../../../config/database";
+import { APIError } from "../../../helpers/error/apiError";
 
-const updateTodo = async (
-  pool: Pool,
+export const updateTodoListInDatabase = async (
   todoId: string,
-  updates: Partial<Todo.Todo>
+  key: keyof Todo.Todo,
+  value: string
 ) => {
-  const todoQuery = `
-   UPDATE todos SET title = COALESCE($1, title) WHERE id = $2 RETURNING *;
- `;
-
-  const todoListQuery = `
+  const dbInstance = await connectDb();
+  const query = `
    UPDATE todo_lists 
    SET 
-     title = COALESCE($1, title),
-     description = COALESCE($2, description),
-     comment = COALESCE($3, comment),
-     label = COALESCE($4, label),
-     date = COALESCE($5, date),
-     attachment = COALESCE($6, attachment),
-     location = COALESCE($7, location),
+     ${key} = COALESCE($1, ${key}),
      updated_at = NOW()
-   WHERE id = $8
+   WHERE todo_id = $2
    RETURNING *;
  `;
 
-  const client = await pool.connect();
+  const values = [value, todoId];
   try {
-    await client.query("BEGIN");
-
-    const todoValues = [updates.title, todoId];
-    await client.query(todoQuery, todoValues);
-
-    if (updates.todoList) {
-      for (const list of updates.todoList) {
-        const todoListValues = [
-          list.title,
-          list.description,
-          list.comment,
-          list.label,
-          list.date,
-          JSON.stringify(list.attachment),
-          list.location,
-          list.id,
-        ];
-        await client.query(todoListQuery, todoListValues);
-      }
-    }
-
-    await client.query("COMMIT");
-    console.log("✅ Todo updated successfully!");
+    const { rows } = await dbInstance.query(query, values);
+    return rows;
   } catch (error) {
-    await client.query("ROLLBACK");
-    throw error;
-  } finally {
-    client.release();
+    throw new APIError("Error while update todo_list in database", 500, error);
+  }
+};
+const updateTodoInDatabase = async (
+  todoId: string,
+  key: keyof Todo.Todo,
+  value: string
+) => {
+  const todoQuery = `
+   UPDATE todos SET title = COALESCE($1, title, updatedAt = NOW() ) WHERE id = $2 RETURNING *;
+ `;
+
+  const dbInstance = await connectDb();
+  try {
+    await dbInstance.query("BEGIN");
+
+    const todoValues = [value, todoId];
+    const { rows } = await dbInstance.query(todoQuery, todoValues);
+    return rows;
+  } catch (error) {
+    await dbInstance.query("ROLLBACK");
+    if (error instanceof APIError) {
+      throw new APIError(error.message, error.statusCode);
+    }
+    throw new APIError("Error while updating todo in database", 500);
   }
 };
 
-export { updateTodo };
+export { updateTodoInDatabase };
